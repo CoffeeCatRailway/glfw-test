@@ -3,10 +3,11 @@
 mod shader;
 use crate::shader::Shader;
 
-// extern crate glfw;
-use glfw::{Context, Key, Action};
+use imgui::Context as ImContext;
+use imgui_glfw_rs::ImguiGLFW;
+use imgui_glfw_rs::glfw::{Context, Key, Action};
+use imgui_glfw_rs::imgui as ImGui;
 
-// extern crate gl;
 use gl;
 use gl::types::*;
 
@@ -104,6 +105,13 @@ fn main() {
 		(shader, VAO, VBO, EBO, indices.len() as GLsizei)
 	};
 
+	let mut imgui = ImContext::create();
+	imgui.set_ini_filename(None);
+	imgui.set_log_filename(None);
+	let mut imguiGlfw = ImguiGLFW::new(&mut imgui, &mut window);
+	imgui.io_mut().display_size = [SCR_WIDTH as f32, SCR_HEIGHT as f32];
+	imgui.io_mut().display_framebuffer_scale = [1.0, 1.0];
+
 	while !window.should_close() {
 		// update
 
@@ -133,11 +141,19 @@ fn main() {
 			}
 		}
 
+		let ui = imguiGlfw.frame(&mut window, &mut imgui);
+		// ui.show_demo_window(&mut true);
+		ui.window("ye").size([100.0, 100.0], ImGui::Condition::FirstUseEver).build(|| {
+			ui.text("Hello, world!".to_string());
+		});
+		imguiGlfw.draw(&mut imgui, &mut window);
+
 		window.swap_buffers();
 		glfw.poll_events();
 
 		// events
 		for (_, event) in glfw::flush_messages(&events) {
+			imguiGlfw.handle_event(&mut imgui, &event);
 			match event {
 				glfw::WindowEvent::FramebufferSize(width, height) => {
 					unsafe { gl::Viewport(0, 0, width, height) }
