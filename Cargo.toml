@@ -1,0 +1,9 @@
+[package]
+name = "glfw-test"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+cgmath = { version = "0.18.0", features = ["swizzle"] }
+gl = "0.14.0"
+glfw = "0.37.0"
