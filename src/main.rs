@@ -10,11 +10,9 @@ use glfw::{Context, Key, Action};
 use gl;
 use gl::types::*;
 
-use std::sync::mpsc::Receiver;
 use std::ffi::{CStr};
 use std::{mem, ptr};
 use std::os::raw::c_void;
-use crate::shader::Shader;
 
 macro_rules! c_str {
     ($literal:expr) => {
@@ -140,7 +138,6 @@ fn main() {
 
 		// events
 		for (_, event) in glfw::flush_messages(&events) {
-			imguiGlfw.handle_event(&mut imgui, &event);
 			match event {
 				glfw::WindowEvent::FramebufferSize(width, height) => {
 					unsafe { gl::Viewport(0, 0, width, height) }
@@ -161,9 +158,8 @@ fn main() {
 	}
 }
 
-// fn handle_window_event(window: &mut glfw::Window, events: &GlfwReceiver<(f64, glfw::WindowEvent)>, imgui: &mut dyn Context, mut imguiGlfw: &ImguiGLFW) {
+// fn handle_window_event(window: &mut glfw::Window, events: &GlfwReceiver<(f64, glfw::WindowEvent)>) {
 // 	for (_, event) in glfw::flush_messages(events) {
-// 		imguiGlfw.handle_event(imgui, &event);
 // 		match event {
 // 			glfw::WindowEvent::FramebufferSize(width, height) => {
 // 				// make sure the viewport matches the new window dimensions; note that width and
