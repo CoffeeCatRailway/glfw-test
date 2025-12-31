@@ -1,6 +1,7 @@
 #![allow(non_snake_case)]
 
 mod shader;
+use crate::shader::Shader;
 
 // extern crate glfw;
 use glfw::{Context, Key, Action};
@@ -25,90 +26,11 @@ macro_rules! c_str {
 const SCR_WIDTH: u32 = 800;
 const SCR_HEIGHT: u32 = 600;
 
-// const VS_SOURCE: &'static str = r#"
-// #version 330 core
-//
-// layout (location = 0) in vec3 i_pos;
-//
-// out vec2 v_pos;
-//
-// void main() {
-// 	gl_Position = vec4(i_pos, 1.);
-// 	v_pos = i_pos.xy;
-// }
-// "#;
-//
-// const FS_SOURCE: &'static str = r#"
-// #version 330 core
-//
-// in vec2 v_pos;
-// uniform vec3 u_color;
-//
-// out vec4 FragColor;
-//
-// void main() {
-// 	// FragColor = vec4(1., .5, .2, 1.);
-// 	vec3 posColor = vec3(v_pos * .5 + .5, 0.);
-// 	FragColor = vec4((posColor + u_color) * .5, 1.);
-// }
-// "#;
-
-// fn compileShader(source: &str, shaderType: GLenum) -> GLuint {
-// 	unsafe {
-// 		let shader = gl::CreateShader(shaderType);
-//
-// 		// Attempt compile
-// 		let sourceStr = CString::new(source).unwrap();
-// 		gl::ShaderSource(shader, 1, &sourceStr.as_ptr(), ptr::null());
-// 		gl::CompileShader(shader);
-//
-// 		// Get compile status
-// 		let mut status = gl::FALSE as GLint;
-// 		gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut status);
-//
-// 		// Check if failed
-// 		if status != (gl::TRUE as GLint) {
-// 			let mut len = 0;
-// 			gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut len);
-// 			let mut buf = Vec::with_capacity(len as usize);
-// 			buf.set_len((len as usize) - 1);
-// 			gl::GetShaderInfoLog(shader, len, ptr::null_mut(), buf.as_mut_ptr() as *mut GLchar);
-// 			panic!("{}", str::from_utf8(&buf).ok().expect("ShaderInfoLog not valid utf8"));
-// 		}
-//
-// 		shader
-// 	}
-// }
-//
-// fn linkShaderProgram(vs: GLuint, fs: GLuint) -> GLuint {
-// 	unsafe {
-// 		let program = gl::CreateProgram();
-// 		gl::AttachShader(program, vs);
-// 		gl::AttachShader(program, fs);
-// 		gl::LinkProgram(program);
-//
-// 		// Get link status
-// 		let mut status = gl::FALSE as GLint;
-// 		gl::GetProgramiv(program, gl::LINK_STATUS, &mut status);
-//
-// 		// Check if failed
-// 		if status != (gl::TRUE as GLint) {
-// 			let mut len: GLint = 0;
-// 			gl::GetProgramiv(program, gl::INFO_LOG_LENGTH, &mut len);
-// 			let mut buf = Vec::with_capacity(len as usize);
-// 			buf.set_len((len as usize) - 1);
-// 			gl::GetProgramInfoLog(program, len, ptr::null_mut(), buf.as_mut_ptr() as *mut GLchar);
-// 			panic!("{}", str::from_utf8(&buf).ok().expect("ProgramInfoLog not valid utf8"));
-// 		}
-// 		program
-// 	}
-// }
-
 fn main() {
     println!("Hello, world!");
 
-	let mut glfw = glfw::init(glfw::FAIL_ON_ERRORS).unwrap();
-	glfw.window_hint(glfw::WindowHint::ContextVersion(3, 3));
+	let mut glfw = glfw::init(glfw::fail_on_errors).unwrap();
+	glfw.window_hint(glfw::WindowHint::ContextVersion(4, 6));
 	glfw.window_hint(glfw::WindowHint::OpenGlProfile(glfw::OpenGlProfileHint::Core));
 	#[cfg(target_os = "macos")] // Whoever uses mac for some reason
 	glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
@@ -117,19 +39,13 @@ fn main() {
 		.expect("Failed to create GLFW window.");
 
 	window.make_current();
-	window.set_key_polling(true);
-	window.set_framebuffer_size_polling(true);
+	window.set_all_polling(true);
 
 	// gl: load all OpenGL function pointers
 	gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
 	let (shader, VAO, VBO, EBO, elementCount) = unsafe {
 		let shader = Shader::new("resources/shaders/vertex.vert", "resources/shaders/fragment.frag");
-		// let vs = compileShader(VS_SOURCE, gl::VERTEX_SHADER);
-		// let fs = compileShader(FS_SOURCE, gl::FRAGMENT_SHADER);
-		// let shaderProgram = linkShaderProgram(vs, fs);
-		// gl::DeleteShader(vs);
-		// gl::DeleteShader(fs);
 
 		// vertex data and vao
 		// let vertices: [f32; 12] = [
@@ -191,8 +107,7 @@ fn main() {
 	};
 
 	while !window.should_close() {
-		// events
-		handle_window_event(&mut window, &events);
+		// update
 
 		// render
 		unsafe {
@@ -212,13 +127,30 @@ fn main() {
 			shader.setUniform3f(c_str!("u_color"), red, green, blue);
 
 			gl::BindVertexArray(VAO);
-			// gl::DrawArrays(gl::TRIANGLES, 0, 3);
-			// gl::BindVertexArray(0);
 			gl::DrawElements(gl::TRIANGLES, elementCount, gl::UNSIGNED_INT, ptr::null());
+
+			let error = gl::GetError();
+			if error != gl::NO_ERROR {
+				panic!("OpenGL error ({})", error);
+			}
 		}
 
 		window.swap_buffers();
 		glfw.poll_events();
+
+		// events
+		for (_, event) in glfw::flush_messages(&events) {
+			imguiGlfw.handle_event(&mut imgui, &event);
+			match event {
+				glfw::WindowEvent::FramebufferSize(width, height) => {
+					unsafe { gl::Viewport(0, 0, width, height) }
+				}
+				glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
+					window.set_should_close(true)
+				}
+				_ => {}
+			}
+		}
 	}
 
 	unsafe {
@@ -229,18 +161,19 @@ fn main() {
 	}
 }
 
-fn handle_window_event(window: &mut glfw::Window, events: &Receiver<(f64, glfw::WindowEvent)>) {
-	for (_, event) in glfw::flush_messages(events) {
-		match event {
-			glfw::WindowEvent::FramebufferSize(width, height) => {
-				// make sure the viewport matches the new window dimensions; note that width and
-				// height will be significantly larger than specified on retina displays.
-				unsafe { gl::Viewport(0, 0, width, height) }
-			}
-			glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
-				window.set_should_close(true)
-			}
-			_ => {}
-		}
-	}
-}
+// fn handle_window_event(window: &mut glfw::Window, events: &GlfwReceiver<(f64, glfw::WindowEvent)>, imgui: &mut dyn Context, mut imguiGlfw: &ImguiGLFW) {
+// 	for (_, event) in glfw::flush_messages(events) {
+// 		imguiGlfw.handle_event(imgui, &event);
+// 		match event {
+// 			glfw::WindowEvent::FramebufferSize(width, height) => {
+// 				// make sure the viewport matches the new window dimensions; note that width and
+// 				// height will be significantly larger than specified on retina displays.
+// 				unsafe { gl::Viewport(0, 0, width, height) }
+// 			}
+// 			glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
+// 				window.set_should_close(true)
+// 			}
+// 			_ => {}
+// 		}
+// 	}
+// }
