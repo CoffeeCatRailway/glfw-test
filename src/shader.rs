@@ -1,13 +1,14 @@
 #![allow(non_snake_case)]
 
+use cgmath::{Matrix, Matrix4, Vector2, Vector3, Vector4};
+use gl;
+use gl::types::*;
+
 use std::ffi::{CStr, CString};
 use std::fs::File;
 use std::io::Read;
 use std::ptr;
 use std::str;
-use cgmath::{Matrix, Matrix4, Vector2, Vector3, Vector4};
-use gl;
-use gl::types::*;
 
 pub struct Shader {
 	pub id: u32,
