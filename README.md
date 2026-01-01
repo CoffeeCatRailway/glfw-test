@@ -7,5 +7,6 @@ A simple example of using OpenGL and ImGui in Rust.
 
 **Todo:**
 * Fix mouse capture
+* ImGui .ini file crash
 
 ![Screenshot](resources/glfw-test_01-01-2026_52-49-14.png)
