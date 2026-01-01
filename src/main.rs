@@ -74,13 +74,13 @@ fn main() {
 	let mut dt: f32;
 	let mut lastFrameTime: f32 = 0.0;
 	
-	let (shader, VAO, VBO, EBO, elementCount) = unsafe {
+	let shader = Shader::new(
+		"resources/shaders/vertex.vert",
+		"resources/shaders/fragment.frag",
+	);
+	
+	let (VAO, VBO, EBO, elementCount) = unsafe {
 		gl::Enable(gl::DEPTH_TEST);
-		
-        let shader = Shader::new(
-            "resources/shaders/vertex.vert",
-            "resources/shaders/fragment.frag",
-        );
 
         // vertex data and vao
         // let vertices: [f32; 12] = [
@@ -145,7 +145,7 @@ fn main() {
         gl::BindBuffer(gl::ARRAY_BUFFER, 0);
         gl::BindVertexArray(0);
 
-        (shader, VAO, VBO, EBO, indices.len() as GLsizei)
+        (VAO, VBO, EBO, indices.len() as GLsizei)
     };
 
     while !window.should_close() {
@@ -225,31 +225,33 @@ fn main() {
         unsafe {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
             gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
-
-            shader.bind();
-
-            let third = 1.0f32 / 3.0;
-            // abs(mod(x,2)-1) = triangle wave
-
-            let red = ((0.25 * frameTime) % 2.0 - 1.0).abs(); //time.cos() * 0.5 + 0.5;
-            let green = ((0.25 * frameTime + third) % 2.0 - 1.0).abs(); //time.sin() * 0.5 + 0.5;
-            let blue = ((0.25 * frameTime - third) % 2.0 - 1.0).abs();
-            shader.setUniform3f("u_color", red, green, blue);
+		}
+		
+		shader.bind();
+		
+		let third = 1.0f32 / 3.0;
+		// abs(mod(x,2)-1) = triangle wave
+		
+		let red = ((0.25 * frameTime) % 2.0 - 1.0).abs(); //time.cos() * 0.5 + 0.5;
+		let green = ((0.25 * frameTime + third) % 2.0 - 1.0).abs(); //time.sin() * 0.5 + 0.5;
+		let blue = ((0.25 * frameTime - third) % 2.0 - 1.0).abs();
+		shader.setUniform3f("u_color", red, green, blue);
+		
+		let projection: Matrix4<f32> = perspective(Deg(camera.zoom), winWidth as f32 / winHeight as f32, 0.1, 100.0);
+		let view = camera.getViewMatrix();
+		let model: Matrix4<f32> = one();
+		let pvm = projection * view * model;
+		shader.setMatrix4f("u_pvm", &pvm);
+		
+		unsafe {
+			gl::BindVertexArray(VAO);
+			gl::DrawElements(gl::TRIANGLES, elementCount, gl::UNSIGNED_INT, ptr::null());
 			
-			let projection: Matrix4<f32> = perspective(Deg(camera.zoom), winWidth as f32 / winHeight as f32, 0.1, 100.0);
-			let view = camera.getViewMatrix();
-			let model: Matrix4<f32> = one();
-			let pvm = projection * view * model;
-			shader.setMatrix4f("u_pvm", &pvm);
-
-            gl::BindVertexArray(VAO);
-            gl::DrawElements(gl::TRIANGLES, elementCount, gl::UNSIGNED_INT, ptr::null());
-
-            let error = gl::GetError();
-            if error != gl::NO_ERROR {
-                panic!("OpenGL error ({})", error);
-            }
-        }
+			let error = gl::GetError();
+			if error != gl::NO_ERROR {
+				panic!("OpenGL error ({})", error);
+			}
+		}
 
 		// imgui
         let ui = imguiGlfw.frame(&mut window, &mut imgui);
@@ -272,9 +274,9 @@ fn main() {
         glfw.poll_events();
     }
 	window.set_cursor_mode(glfw::CursorMode::Normal);
-
-    unsafe {
-        shader.delete();
+	
+	shader.delete();
+	unsafe {
         gl::DeleteBuffers(1, &EBO);
         gl::DeleteBuffers(1, &VBO);
         gl::DeleteVertexArrays(1, &VAO);

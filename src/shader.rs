@@ -66,19 +66,19 @@ impl Shader {
         shader
     }
 
-    pub unsafe fn bind(&self) {
+    pub fn bind(&self) {
         unsafe {
             gl::UseProgram(self.id);
         }
     }
 
-    pub unsafe fn delete(&self) {
+    pub fn delete(&self) {
         unsafe {
             gl::DeleteShader(self.id);
         }
     }
 
-    pub unsafe fn getAttribLocation(&self, name: &str) -> GLint {
+    pub fn getAttribLocation(&self, name: &str) -> GLint {
         unsafe {
             let c_str = CString::new(name.as_bytes()).unwrap();
             gl::GetAttribLocation(self.id, c_str.as_ptr() as *const GLchar)
@@ -86,7 +86,7 @@ impl Shader {
     }
 
     // Uniforms
-    pub unsafe fn setUniform1i(&self, name: &str, value: i32) {
+    pub fn setUniform1i(&self, name: &str, value: i32) {
         unsafe {
             let c_str = CString::new(name.as_bytes()).unwrap();
             gl::Uniform1i(
@@ -96,60 +96,54 @@ impl Shader {
         }
     }
 
-    pub unsafe fn setUniform1ui(&self, name: &str, value: u32) {
+    pub fn setUniform1ui(&self, name: &str, value: u32) {
         unsafe {
             let c_str = CString::new(name.as_bytes()).unwrap();
             gl::Uniform1ui(gl::GetUniformLocation(self.id, c_str.as_ptr()), value);
         }
     }
 
-    pub unsafe fn setUniform1f(&self, name: &str, value: f32) {
+    pub fn setUniform1f(&self, name: &str, value: f32) {
         unsafe {
             let c_str = CString::new(name.as_bytes()).unwrap();
             gl::Uniform1f(gl::GetUniformLocation(self.id, c_str.as_ptr()), value);
         }
     }
 
-    pub unsafe fn setUniform2fv(&self, name: &str, value: &Vector2<f32>) {
-        unsafe {
-            self.setUniform2f(name, value.x, value.y);
-        }
+    pub fn setUniform2fv(&self, name: &str, value: &Vector2<f32>) {
+        self.setUniform2f(name, value.x, value.y);
     }
 
-    pub unsafe fn setUniform2f(&self, name: &str, x: f32, y: f32) {
+    pub fn setUniform2f(&self, name: &str, x: f32, y: f32) {
         unsafe {
             let c_str = CString::new(name.as_bytes()).unwrap();
             gl::Uniform2f(gl::GetUniformLocation(self.id, c_str.as_ptr()), x, y);
         }
     }
 
-    pub unsafe fn setUniform3fv(&self, name: &str, value: &Vector3<f32>) {
-        unsafe {
-            self.setUniform3f(name, value.x, value.y, value.z);
-        }
+    pub fn setUniform3fv(&self, name: &str, value: &Vector3<f32>) {
+        self.setUniform3f(name, value.x, value.y, value.z);
     }
 
-    pub unsafe fn setUniform3f(&self, name: &str, x: f32, y: f32, z: f32) {
+    pub fn setUniform3f(&self, name: &str, x: f32, y: f32, z: f32) {
         unsafe {
             let c_str = CString::new(name.as_bytes()).unwrap();
             gl::Uniform3f(gl::GetUniformLocation(self.id, c_str.as_ptr()), x, y, z);
         }
     }
 
-    pub unsafe fn setUniform4fv(&self, name: &str, value: &Vector4<f32>) {
-        unsafe {
-            self.setUniform4f(name, value.x, value.y, value.z, value.w);
-        }
+    pub fn setUniform4fv(&self, name: &str, value: &Vector4<f32>) {
+        self.setUniform4f(name, value.x, value.y, value.z, value.w);
     }
 
-    pub unsafe fn setUniform4f(&self, name: &str, x: f32, y: f32, z: f32, w: f32) {
+    pub fn setUniform4f(&self, name: &str, x: f32, y: f32, z: f32, w: f32) {
         unsafe {
             let c_str = CString::new(name.as_bytes()).unwrap();
             gl::Uniform4f(gl::GetUniformLocation(self.id, c_str.as_ptr()), x, y, z, w);
         }
     }
 
-    pub unsafe fn setMatrix4f(&self, name: &str, mat: &Matrix4<f32>) {
+    pub fn setMatrix4f(&self, name: &str, mat: &Matrix4<f32>) {
         unsafe {
             let c_str = CString::new(name.as_bytes()).unwrap();
             gl::UniformMatrix4fv(
