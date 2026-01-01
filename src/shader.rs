@@ -1,4 +1,5 @@
 #![allow(non_snake_case)]
+/* Based on https://github.com/bwasty/learn-opengl-rs/blob/master/src/shader.rs */
 
 use cgmath::{Matrix, Matrix4, Vector2, Vector3, Vector4};
 use gl;
