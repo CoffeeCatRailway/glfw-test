@@ -33,6 +33,7 @@ fn main() {
     ));
     #[cfg(target_os = "macos")] // Whoever uses mac for some reason
     glfw.window_hint(glfw::WindowHint::OpenGlForwardCompat(true));
+	println!("GLFW initialized, version: {}", glfw::get_version_string());
 
 	let (mut winWidth, mut winHeight) = (SCR_WIDTH, SCR_HEIGHT);
     let (mut window, events) = glfw
@@ -51,7 +52,8 @@ fn main() {
 
     // gl: load all OpenGL function pointers
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
-	
+	println!("OpenGL function pointers");
+
 	let mut imgui = ImContext::create();
 	imgui.set_ini_filename(None);
 	imgui.set_log_filename(None);
@@ -60,6 +62,7 @@ fn main() {
 	// let (fbx, fby) = window.get_framebuffer_size();
 	// imgui.io_mut().display_framebuffer_scale = [fbx as f32 / winWidth as f32, fbx as f32 / winWidth as f32];
 	imgui.io_mut().display_framebuffer_scale = [1.0, 1.0];
+	println!("ImGUI initialized, version: {}", ImGui::dear_imgui_version());
 	
 	let mut camera = Camera {
 		pos: Point3::new(0.0, 0.0, 3.0),
@@ -82,6 +85,9 @@ fn main() {
 	let (VAO, VBO, EBO, elementCount) = unsafe {
 		gl::Enable(gl::DEPTH_TEST);
 		gl::PolygonMode(gl::FRONT_AND_BACK, gl::FILL);
+
+		// gl::Enable(gl::CULL_FACE);
+		// gl::CullFace(gl::FRONT);
 
         // vertex data and vao
         // let vertices: [f32; 12] = [
@@ -149,6 +155,7 @@ fn main() {
         (VAO, VBO, EBO, indices.len() as GLsizei)
     };
 
+	println!("Stating main loop");
     while !window.should_close() {
         // pre-frame time logic
 		let frameTime = glfw.get_time() as f32;
@@ -289,7 +296,8 @@ fn main() {
         glfw.poll_events();
     }
 	window.set_cursor_mode(glfw::CursorMode::Normal);
-	
+
+	println!("Cleaning up");
 	shader.delete();
 	unsafe {
         gl::DeleteBuffers(1, &EBO);
