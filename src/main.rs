@@ -81,6 +81,7 @@ fn main() {
 	
 	let (VAO, VBO, EBO, elementCount) = unsafe {
 		gl::Enable(gl::DEPTH_TEST);
+		gl::PolygonMode(gl::FRONT_AND_BACK, gl::FILL);
 
         // vertex data and vao
         // let vertices: [f32; 12] = [
@@ -190,6 +191,7 @@ fn main() {
 					
 					if mouseMode {
 						camera.processMouseMovement(xo, yo, true);
+						// window.set_cursor_pos(winWidth as f64 / 2.0, winHeight as f64 / 2.0);
 					}
 				},
 				glfw::WindowEvent::Scroll(_, yo) => {
@@ -257,7 +259,7 @@ fn main() {
         let ui = imguiGlfw.frame(&mut window, &mut imgui);
         // ui.show_demo_window(&mut true);
         ui.window("ye")
-            .size([160.0, 110.0], ImGui::Condition::FirstUseEver)
+            .size([160.0, 130.0], ImGui::Condition::FirstUseEver)
             .build(|| {
                 ui.text("Hello, world!".to_string());
                 let s = ui.window_size();
@@ -266,6 +268,19 @@ fn main() {
 				ui.separator();
 				ui.text(format!("Mouse Pos: {}/{}", lastMX, lastMY));
 				ui.text(format!("Mouse Mode: {}", if mouseMode { "Captured" } else { "Normal" }));
+				
+				ui.separator();
+				if ui.button("Wireframe Toggle") {
+					unsafe {
+						let mut mode: GLint = gl::FILL as GLint;
+						gl::GetIntegerv(gl::POLYGON_MODE, &mut mode);
+						if mode == gl::FILL as GLint {
+							gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE);
+						} else {
+							gl::PolygonMode(gl::FRONT_AND_BACK, gl::FILL);
+						}
+					}
+				}
             });
         imguiGlfw.draw(&mut imgui, &mut window);
 
