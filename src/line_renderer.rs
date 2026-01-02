@@ -117,7 +117,7 @@ impl LineRenderer {
     }
 
     pub fn drawFlush(&mut self, pvMatrix: &Matrix4) {
-        if !self.enabled || self.vec.len() < FLOATS * 2 {
+        if self.vec.len() < FLOATS * 2 || self.floatsPushed < FLOATS * 2 {
             return;
         }
 

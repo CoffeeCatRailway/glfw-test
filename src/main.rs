@@ -178,7 +178,7 @@ fn main() {
 				glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
 					window.set_should_close(true)
 				},
-				glfw::WindowEvent::Key(Key::Q, _, Action::Press, _) => {
+				glfw::WindowEvent::Key(Key::Num1, _, Action::Press, _) => {
 					if mouseMode {
 						window.set_cursor_mode(glfw::CursorMode::Disabled);
 					} else {
@@ -301,7 +301,7 @@ fn main() {
         let ui = imguiGlfw.frame(&mut window, &mut imgui);
         // ui.show_demo_window(&mut true);
         ui.window("ye")
-            .size([160.0, 130.0], ImGui::Condition::FirstUseEver)
+            .size([170.0, 160.0], ImGui::Condition::FirstUseEver)
             .build(|| {
                 ui.text("Hello, world!".to_string());
                 let s = ui.window_size();
@@ -309,9 +309,12 @@ fn main() {
 				
 				ui.separator();
 				ui.text(format!("Mouse Pos: {}/{}", lastMX, lastMY));
-				ui.text(format!("Mouse Mode: {}", if mouseMode { "Captured" } else { "Normal" }));
+				ui.text(format!("Mouse Mode (1): {}", if mouseMode { "Captured" } else { "Normal" }));
 				
 				ui.separator();
+				if ui.button("Line Renderer Toggle") {
+					lineRenderer.enabled = !lineRenderer.enabled;
+				}
 				if ui.button("Wireframe Toggle") {
 					unsafe {
 						let mut mode: GLint = gl::FILL as GLint;
