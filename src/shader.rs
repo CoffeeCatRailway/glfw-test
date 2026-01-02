@@ -52,8 +52,8 @@ impl Shader {
             gl::AttachShader(id, geometry);
             gl::AttachShader(id, fragment);
 
-            let fragColor = CString::new("o_color").unwrap();
-            gl::BindFragDataLocation(id, 0, fragColor.as_ptr());
+            let fragColor = CString::new("o_color".as_bytes()).unwrap();
+            gl::BindFragDataLocation(id, 0, fragColor.as_ptr() as *const GLchar);
             gl::LinkProgram(id);
 
             shader.checkLinkStatus(id);

@@ -2,21 +2,23 @@
 
 mod shader;
 mod camera;
+mod line_renderer;
 
 use crate::shader::Shader;
-use crate::camera::{Camera, Movement};
+use crate::line_renderer::LineRenderer;
 
+use crate::camera::{Camera, Movement};
 use imgui::Context as ImContext;
 use imgui_glfw_rs::ImguiGLFW;
 use imgui_glfw_rs::glfw::{Action, Context, Key};
+
 use imgui_glfw_rs::imgui as ImGui;
-
 use gl;
-use gl::types::*;
 
+use gl::types::*;
 use std::os::raw::c_void;
 use std::{mem, ptr};
-use cgmath::{perspective, Deg, Matrix4, Point3};
+use cgmath::{perspective, vec3, Deg, Matrix4, Point3};
 use cgmath::num_traits::one;
 
 // settings
@@ -154,7 +156,9 @@ fn main() {
 
         (VAO, VBO, EBO, indices.len() as GLsizei)
     };
-
+	
+	let mut lineRenderer = LineRenderer::new(1024);
+	
 	println!("Stating main loop");
     while !window.should_close() {
         // pre-frame time logic
@@ -230,6 +234,35 @@ fn main() {
 			camera.processMovement(Movement::Right, dt);
 		}
 
+		let white = vec3(1.0, 1.0, 1.0);
+		let red = vec3(1.0, 0.0, 0.0);
+		let green = vec3(0.0, 1.0, 0.0);
+		let blue = vec3(0.0, 0.0, 1.0);
+		lineRenderer.pushLine(
+			vec3(-1.0, -1.0, -1.0),
+			white,
+			vec3(-1.0, 1.0, -1.0),
+			red,
+		);
+		lineRenderer.pushLine(
+			vec3(-1.0, 1.0, -1.0),
+			red,
+			vec3(1.0, 1.0, 1.0),
+			green,
+		);
+		lineRenderer.pushLine(
+			vec3(1.0, 1.0, 1.0),
+			green,
+			vec3(1.0, -1.0, 1.0),
+			blue,
+		);
+		lineRenderer.pushLine(
+			vec3(1.0, -1.0, 1.0),
+			blue,
+			vec3(-1.0, -1.0, -1.0),
+			white,
+		);
+
         // render
         unsafe {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
@@ -261,6 +294,8 @@ fn main() {
 				panic!("OpenGL error ({})", error);
 			}
 		}
+		
+		lineRenderer.drawFlush(&pvm);
 
 		// imgui
         let ui = imguiGlfw.frame(&mut window, &mut imgui);
@@ -298,6 +333,7 @@ fn main() {
 	window.set_cursor_mode(glfw::CursorMode::Normal);
 
 	println!("Cleaning up");
+	lineRenderer.destroy();
 	shader.delete();
 	unsafe {
         gl::DeleteBuffers(1, &EBO);
