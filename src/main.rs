@@ -5,21 +5,21 @@ mod camera;
 mod line_renderer;
 
 use crate::shader::Shader;
+use crate::camera::{Camera, Movement};
 use crate::line_renderer::LineRenderer;
 
-use crate::camera::{Camera, Movement};
 use imgui::Context as ImContext;
 use imgui_glfw_rs::ImguiGLFW;
 use imgui_glfw_rs::glfw::{Action, Context, Key};
-
 use imgui_glfw_rs::imgui as ImGui;
-use gl;
 
+use gl;
 use gl::types::*;
+
 use std::os::raw::c_void;
-use std::{mem, ptr};
-use cgmath::{perspective, vec3, Deg, Matrix4, Point3};
-use cgmath::num_traits::one;
+use std::ptr;
+use std::f32::consts::PI;
+use cgmath::{perspective, vec3, Array, Deg, Matrix4, Point3, SquareMatrix, Vector3};
 
 // settings
 const SCR_WIDTH: u32 = 800;
@@ -128,7 +128,7 @@ fn main() {
         gl::BindBuffer(gl::ARRAY_BUFFER, VBO);
         gl::BufferData(
             gl::ARRAY_BUFFER,
-            (vertices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
+            (vertices.len() * size_of::<GLfloat>()) as GLsizeiptr,
             vertices.as_ptr() as *const c_void,
             gl::STATIC_DRAW,
         );
@@ -136,7 +136,7 @@ fn main() {
         gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, EBO);
         gl::BufferData(
             gl::ELEMENT_ARRAY_BUFFER,
-            (indices.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
+            (indices.len() * size_of::<GLfloat>()) as GLsizeiptr,
             indices.as_ptr() as *const c_void,
             gl::STATIC_DRAW,
         );
@@ -146,7 +146,7 @@ fn main() {
             3,
             gl::FLOAT,
             gl::FALSE,
-            3 * mem::size_of::<GLfloat>() as GLsizei,
+            3 * size_of::<GLfloat>() as GLsizei,
             ptr::null(),
         );
         gl::EnableVertexAttribArray(0);
@@ -263,6 +263,26 @@ fn main() {
 		lineRenderer.pushLine(b3, green, t3, green);
 		lineRenderer.pushLine(b4, blue, t4, blue);
 
+		{
+			let mut theta = 0.0f32;
+			let mut lastP = vec3(0.0, -5.0, 0.0);
+			let mut lastC = vec3(0.0, 0.0, 0.0);
+			while theta < PI * 20.0 {
+				let r = theta * 0.05; // r = b * theta (with b=1)
+				let x = r * theta.cos();
+				let y = r * 0.5 - 5.0;
+				let z = r * theta.sin();
+				let c = Vector3::from_value(theta / (PI * 20.0));
+
+				let p = vec3(x, y, z);
+				lineRenderer.pushLine(lastP, lastC, p, c);
+				lastP = p;
+				lastC = c;
+
+				theta += PI * 0.05;
+			}
+		}
+
         // render
         unsafe {
             gl::ClearColor(0.2, 0.3, 0.3, 1.0);
@@ -281,7 +301,7 @@ fn main() {
 		
 		let projection: Matrix4<f32> = perspective(Deg(camera.zoom), winWidth as f32 / winHeight as f32, 0.1, 100.0);
 		let view = camera.getViewMatrix();
-		let model: Matrix4<f32> = one();
+		let model: Matrix4<f32> =  Matrix4::identity();
 		let pvm = projection * view * model;
 		shader.setMatrix4f("u_pvm", &pvm);
 		
