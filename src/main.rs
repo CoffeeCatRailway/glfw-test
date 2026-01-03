@@ -238,30 +238,30 @@ fn main() {
 		let red = vec3(1.0, 0.0, 0.0);
 		let green = vec3(0.0, 1.0, 0.0);
 		let blue = vec3(0.0, 0.0, 1.0);
-		lineRenderer.pushLine(
-			vec3(-1.0, -1.0, -1.0),
-			white,
-			vec3(-1.0, 1.0, -1.0),
-			red,
-		);
-		lineRenderer.pushLine(
-			vec3(-1.0, 1.0, -1.0),
-			red,
-			vec3(1.0, 1.0, 1.0),
-			green,
-		);
-		lineRenderer.pushLine(
-			vec3(1.0, 1.0, 1.0),
-			green,
-			vec3(1.0, -1.0, 1.0),
-			blue,
-		);
-		lineRenderer.pushLine(
-			vec3(1.0, -1.0, 1.0),
-			blue,
-			vec3(-1.0, -1.0, -1.0),
-			white,
-		);
+
+		let b1 = vec3(-1.0, -1.0, -1.0);
+		let b2 = vec3(1.0, -1.0, -1.0);
+		let b3 = vec3(1.0, -1.0, 1.0);
+		let b4 = vec3(-1.0, -1.0, 1.0);
+		let t1 = vec3(-1.0, 1.0, -1.0);
+		let t2 = vec3(1.0, 1.0, -1.0);
+		let t3 = vec3(1.0, 1.0, 1.0);
+		let t4 = vec3(-1.0, 1.0, 1.0);
+
+		lineRenderer.pushLine(b1, white, b2, red);
+		lineRenderer.pushLine(b2, red, b3, green);
+		lineRenderer.pushLine(b3, green, b4, blue);
+		lineRenderer.pushLine(b4, blue, b1, white);
+
+		lineRenderer.pushLine(t1, white, t2, red);
+		lineRenderer.pushLine(t2, red, t3, green);
+		lineRenderer.pushLine(t3, green, t4, blue);
+		lineRenderer.pushLine(t4, blue, t1, white);
+
+		lineRenderer.pushLine(b1, white, t1, white);
+		lineRenderer.pushLine(b2, red, t2, red);
+		lineRenderer.pushLine(b3, green, t3, green);
+		lineRenderer.pushLine(b4, blue, t4, blue);
 
         // render
         unsafe {
