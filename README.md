@@ -5,8 +5,13 @@
 A simple example of using OpenGL and ImGui in Rust.
 <br />I also used [Learn OpenGL RS](https://github.com/bwasty/learn-opengl-rs) a rust port of [learnopengl.com](https://learnopengl.com)
 
+**Includes:**
+* Camera (WASD + Space/LShift)
+* Line Renderer
+* Shaders
+
 **Todo:**
 * Fix mouse capture
 * ImGui .ini file crash
 
-![Screenshot](resources/glfw-test_01-01-2026_52-49-14.png)
+![Line Renderer](resources/Screenshot_20260103_115151.png)
